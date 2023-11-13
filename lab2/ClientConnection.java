@@ -1,7 +1,9 @@
-package org.example;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ClientConnection {
@@ -9,11 +11,13 @@ public class ClientConnection {
     private InputStream in;
     private OutputStream out;
     private BufferedReader reader;
-    PrintWriter writer;
+
 
     private String myTopic = null;
 
-    private static Pattern pattern = Pattern.compile("([a-z]+)( )(.+)(\\n)");
+    private static Pattern rolePattern = Pattern.compile("((send)|(recieve))( )(.+)(\\n)");
+    private static Pattern msgPattern = Pattern.compile("(message)( )(\\d+)(\\n)");
+
 
     public ClientConnection(Socket socket){
         this.socket = socket;
@@ -27,16 +31,19 @@ public class ClientConnection {
             out = socket.getOutputStream();
             reader = new BufferedReader(new InputStreamReader(in));
 
-            String text;
-
-            while (true){
-                text = reader.readLine();
-                if (text == "Disconnect") break;
-
+            String text = reader.readLine();;
+            Matcher matcher = rolePattern.matcher(text);
+            if( matcher.find()) {
+                myTopic = matcher.group(1);
+                if (matcher.group(3)=="send") Server.putTopicSender(matcher.group(1),this);
+                else if (matcher.group(3)=="recieve") Server.putTopicReciever(matcher.group(3),this);
             }
 
+
+
+
             reader.close();
-            writer.close();
+            //writer.close();
             in.close();
             out.close();
             socket.close();
@@ -45,7 +52,7 @@ public class ClientConnection {
         }
         finally {
             Server.removeFromTopic(myTopic,this);
-            Thread.currentThread().interrupt();
+            //Thread.currentThread().interrupt();
         }
 
     }

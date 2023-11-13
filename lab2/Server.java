@@ -1,5 +1,3 @@
-package org.example;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -14,7 +12,7 @@ public class Server {
 
         ServerSocket serverSocket = new ServerSocket(8080);
 
-        
+
     }
 
     public static synchronized void putTopicSender(String topic, ClientConnection sender){
@@ -32,10 +30,13 @@ public class Server {
     }
 
     public static synchronized void sendMsgToTopic(String topic, String msg){
-
+        if (!topicRecievers.containsKey(topic)) return;
+        if (topicRecievers.get(topic).size()==0) return;
+        topicRecievers.get(topic).get(0).send(msg);
     }
 
     public static synchronized void removeFromTopic(String topic, ClientConnection member){
+        if (topic == null) return;
         if (topicSenders.containsKey(topic)) {
             if ( topicSenders.get(topic).contains(member) ) topicSenders.get(topic).remove(member);
         }
