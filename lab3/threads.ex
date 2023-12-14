@@ -1,7 +1,6 @@
 defmodule Integration do
   def calculate_integral(f, a, b, h, n, num_threads) do
     create_threads(f, a, b, h, n, 1, num_threads)
-  |> Enum.map(&Task.await/1)
   |> Enum.sort(&Map.get(&1, :Время) <= Map.get(&2, :Время))
   end
 
