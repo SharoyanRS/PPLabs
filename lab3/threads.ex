@@ -1,7 +1,7 @@
 defmodule Integration do
   def calculate_integral(f, a, b, h, n, num_threads) do
     create_threads(f, a, b, h, n, 1, num_threads)
-  |> Enum.sort(&Map.get(&1, :Время) <= Map.get(&2, :Время))
+  |> Enum.map(&Task.await/1)
   end
 
 
@@ -35,13 +35,13 @@ defmodule Integration do
   b = :math.pi
   h = 0.0001
   n = 100000
-  
+
   Enum.each(1..20, fn num_threads ->
   maps = Integration.calculate_integral(f, a, b, h, n, num_threads)
- 
+
   IO.puts("thread count: #{length(maps)}")
 
- 
+
   time = Enum.reduce(maps,0, fn map, acc ->
     acc + Map.get(map, :Время)
     end)
